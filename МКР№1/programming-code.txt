@@ -1,0 +1,103 @@
+﻿Программный Код:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h> // Додано для використання strlen
+
+// Функція для обміну двох елементів масиву
+void swap(char *a, char *b) {
+    char temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Функція для сортування частини масиву (Quick Sort)
+int partition(char arr[], int low, int high) {
+    char pivot = arr[high];
+    int i = (low - 1);
+
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+void quickSort(char arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Функція для генерації випадкових символів
+void generateRandomArray(char arr[], int N) {
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#";
+    int length = strlen(charset); // Тепер strlen коректно оголошена
+
+    for (int i = 0; i < N; i++) {
+        arr[i] = charset[rand() % length];
+    }
+}
+
+// Функція для запису даних у файл
+void writeToFile(const char* filename, char arr[], int N) {
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        printf("Помилка відкриття файлу для запису.\n");
+        exit(1);
+    }
+
+    fprintf(file, "%d\n", N);
+    for (int i = 0; i < N; i++) {
+        fprintf(file, "%c ", arr[i]);
+    }
+
+    fclose(file);
+}
+
+int main() {
+    const char* outputFile = "output.txt";
+
+    int N = 40; // Кількість елементів
+    char* A = (char*)malloc(N * sizeof(char));
+    if (!A) {
+        printf("Помилка виділення пам'яті.\n");
+        return 1;
+    }
+
+    // Генерація випадкового масиву
+    srand(time(NULL));
+    generateRandomArray(A, N);
+
+    // Запис сгенерованого масиву у файл output.txt
+    writeToFile(outputFile, A, N);
+
+    // Сортування масиву
+    quickSort(A, 0, N - 1);
+
+    // Дописування відсортованого масиву у файл output.txt
+    FILE* file = fopen(outputFile, "a");
+    if (!file) {
+        printf("Помилка відкриття файлу для запису.\n");
+        free(A);
+        return 1;
+    }
+
+    fprintf(file, "\nВідсортований масив:\n");
+    for (int i = 0; i < N; i++) {
+        fprintf(file, "%c ", A[i]);
+    }
+
+    fclose(file);
+    free(A);
+
+    printf("Сортування завершено. Результат записано у файл %s\n", outputFile);
+    return 0;
+}
